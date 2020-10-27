@@ -25,8 +25,17 @@ sap.ui.define([
 				stackedColumn2 : false,
 
 				depExpensesCard : false,
-				depExpTransCard : false
+				depExpTransCard : false,
+
 			}),"authority");
+
+			this.getView().setModel(new JSONModel({
+				
+				paymentCard : []
+
+			}));
+
+			this.getView().getModel().setProperty("/paymentComboData", "A")
 
 			this._oRouter = sap.ui.core.UIComponent.getRouterFor(this);
 			this._oRouter.attachRouteMatched(this.onAfterRendering, this);
@@ -216,8 +225,6 @@ sap.ui.define([
 				}
 			}).fail(function(sErrorMessage){  // 호출 실패
 				alert(sErrorMessage);
-			}).then(function(){  // 여기다가 rfc 호출후 작업코딩
-			
 			});
 			
 
@@ -229,6 +236,8 @@ sap.ui.define([
 		 **********************************************************************************/
 		callDataStatusList : function(oCardModel){
 			// 전표 현황 카드 객체
+			var oModel = this.getView().getModel();
+			var that = this;
 			var EMPNOData = this.getOwnerComponent().getCookiy("EMPNO");
 			var oCard = this.getView().byId("statusListCard");
 
@@ -256,6 +265,9 @@ sap.ui.define([
 			var E_PCANBUD = 0;   //프로젝트 예산 증액 요청 반려 건수
 			var E_PBUDLSEND = 0;   //프로젝트 예산 증액 요청 미결 건수
 			var E_PBUDCOM = 0;   //프로젝트 예산 증액 요청 완료 건수
+
+			var aaa = oCardModel.getProperty("/statusList/sap.card/configuration/filters/name/value");
+			console.log(aaa);
 
 			// 전표 현황 데이터 배열
 			var statusListData = [];
@@ -286,10 +298,13 @@ sap.ui.define([
 				E_PCANBUD = parseInt(oResultData.E_PCANBUD);
 				E_PBUDLSEND = parseInt(oResultData.E_PBUDLSEND);
 				E_PBUDCOM = parseInt(oResultData.E_PBUDCOM);
-
+				
 				// 건수가 있으면 전표 현황 데이터 배열에 push
 				//요청자가 보임
-				if(E_SAVENUM){
+				var reqConut = 0;
+				var resCount = 0;
+				if(E_SAVENUM && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
 					statusListData.push({
 						name : "임시저장",
 						icon : "sap-icon://activity-items",
@@ -298,7 +313,8 @@ sap.ui.define([
 					 })
 				}
 				//요청자가 보임
-				if(E_PERREQ){
+				if(E_PERREQ && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
 					statusListData.push({
 						name : "승인요청",
 						icon : "sap-icon://activity-items",
@@ -307,53 +323,39 @@ sap.ui.define([
 					 })
 				}
 				//요청자가 보임
-				if(E_CANCPER){
-					statusListData.push({
-						name : "승인요청 반려",
-						icon : "sap-icon://activity-items",
-						number : E_CANCPER,
-						State: "Error"
-					 })
-				}
-				//요청자가 보임
-				if(E_REQCOM){
+				if(E_REQCOM && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
 					statusListData.push({
 						name : "승인요청 완료",
 						icon : "sap-icon://activity-items",
 						number : E_REQCOM,
 						State: "Success"
-					 })
+					})
 				}
 				//요청자가 보임
-				if(E_CANCPAY){
-					statusListData.push({
-						name : "지급 반려",
-						icon : "sap-icon://activity-items",
-						number : E_CANCPAY,
-						State: "Error"
-					 })
-				}
-				//요청자가 보임
-				if(E_PAYCOM){
+				if(E_PAYCOM && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
 					statusListData.push({
 						name : "지급 완료",
 						icon : "sap-icon://activity-items",
 						number : E_PAYCOM,
 						State: "Success"
-					 })
+					})
 				}
 
 				// 승인자만 보임
-				if(E_REQLSEND){
+				if(E_REQLSEND && oModel.getProperty("/paymentComboData") === "B"){
+					resCount++;
 					statusListData.push({
 						name : "승인요청 미결",
 						icon : "sap-icon://activity-items",
 						number : E_REQLSEND,
 						State: "Warning"
-					 })
+					})
 				}
 				//지급자만 보임
-				if(E_PAYLSEND){
+				if(E_PAYLSEND && oModel.getProperty("/paymentComboData") === "B"){
+					resCount++;
 					statusListData.push({
 						name : "지급 미결",
 						icon : "sap-icon://activity-items",
@@ -363,7 +365,8 @@ sap.ui.define([
 				}
 
 				// 승인자만 보임
-				if(E_DBUDREQ){
+				if(E_DBUDREQ && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
 					statusListData.push({
 						name : "부서 예산 증액 요청",
 						icon : "sap-icon://activity-items",
@@ -371,17 +374,10 @@ sap.ui.define([
 						State: "Success"
 					 })
 				}
-				// 승인자만 보임
-				if(E_DCANBUD){
-					statusListData.push({
-						name : "부서 예산 증액 요청 반려",
-						icon : "sap-icon://activity-items",
-						number : E_DCANBUD,
-						State: "Error"
-					 })
-				}
+
 				// 지급자만 보임
-				if(E_DBUDLSEND){
+				if(E_DBUDLSEND && oModel.getProperty("/paymentComboData") === "B"){
+					resCount++;
 					statusListData.push({
 						name : "부서 예산 증액 요청 미결",
 						icon : "sap-icon://activity-items",
@@ -390,7 +386,8 @@ sap.ui.define([
 					 })
 				}
 				// 승인자만 보임
-				if(E_DBUDCOM){
+				if(E_DBUDCOM && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
 					statusListData.push({
 						name : "부서 예산 증액 요청 완료",
 						icon : "sap-icon://activity-items",
@@ -400,59 +397,112 @@ sap.ui.define([
 				}
 
 				// 승인자만 보임
-				if(E_PBUDREQ){
+				if(E_PBUDREQ && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
 					statusListData.push({
 						name : "프로젝트 예산 증액 요청",
 						icon : "sap-icon://activity-items",
 						number : E_PBUDREQ,
 						State: "Success"
-						})
-				}
-				// 승인자만 보임
-				if(E_PCANBUD){
-					statusListData.push({
-						name : "프로젝트 예산 증액 요청 반려",
-						icon : "sap-icon://activity-items",
-						number : E_PCANBUD,
-						State: "Error"
-						})
+					})
 				}
 				// 지급자만 보임
-				if(E_PBUDLSEND){
+				if(E_PBUDLSEND && oModel.getProperty("/paymentComboData") === "B"){
+					resCount++;
 					statusListData.push({
 						name : "프로젝트 예산 증액 요청 미결",
 						icon : "sap-icon://activity-items",
 						number : E_PBUDLSEND,
 						State: "Warning"
-						})
+					})
 				}
 				// 승인자만 보임
-				if(E_PBUDCOM){
+				if(E_PBUDCOM && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
 					statusListData.push({
 						name : "프로젝트 예산 증액 요청 완료",
 						icon : "sap-icon://activity-items",
 						number : E_PBUDCOM,
 						State: "Success"
-						})
+					})
 				}
+
+				//반려~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+				//요청자가 보임
+				if(E_CANCPAY && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
+					statusListData.push({
+						name : "지급 반려",
+						icon : "sap-icon://activity-items",
+						number : E_CANCPAY,
+						State: "Error"
+					 })
+				}
+				//요청자가 보임
+				if(E_CANCPER && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
+					statusListData.push({
+						name : "승인요청 반려",
+						icon : "sap-icon://activity-items",
+						number : E_CANCPER,
+						State: "Error"
+					})
+				}
+				// 승인자만 보임
+				if(E_DCANBUD && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
+					statusListData.push({
+						name : "부서 예산 증액 요청 반려",
+						icon : "sap-icon://activity-items",
+						number : E_DCANBUD,
+						State: "Error"
+					})
+				}
+				// 승인자만 보임
+				if(E_PCANBUD && oModel.getProperty("/paymentComboData") === "A"){
+					reqConut++;
+					statusListData.push({
+						name : "프로젝트 예산 증액 요청 반려",
+						icon : "sap-icon://activity-items",
+						number : E_PCANBUD,
+						State: "Error"
+					})
+				}
+
+				if(oModel.getProperty("/paymentComboData") === "A"){
+					if(reqConut > 8){
+						that.getView().byId("comboHeight").setHeight("30px");
+					}else if(reqConut > 5){
+						that.getView().byId("comboHeight").setHeight("40px");
+					}else if(reqConut > 3){
+						that.getView().byId("comboHeight").setHeight("100px");
+					}
+
+				}else{
+					if(resCount > 8){
+						that.getView().byId("comboHeight").setHeight("30px");
+					}else if(resCount > 5){
+						that.getView().byId("comboHeight").setHeight("40px");
+					}else if(resCount > 3){
+						that.getView().byId("comboHeight").setHeight("100px");
+					}
+				}
+
+				oModel.setProperty("/comboHeight", iReqList);
 
 				//요청전표 건수 계산
 				iReqList = E_PERREQ + E_CANCPER + E_REQCOM + E_CANCPAY + E_PAYCOM + E_DBUDREQ + E_DCANBUD + E_DBUDCOM + E_PBUDREQ + E_PCANBUD + E_PBUDCOM;
 				iPayList = E_REQLSEND + E_PAYLSEND + E_DBUDLSEND + E_PBUDLSEND;
 				// 전표 건수 data set (총 건수, 요청전표 건수, 미결전표 건수) 순서
-				oCardModel.setProperty("/statusList/sap.card/header/data/json/listInfos/listData/number", iReqList+iPayList);
-				oCardModel.setProperty("/statusList/sap.card/header/data/json/listInfos/listData/request/number", iReqList);
-				oCardModel.setProperty("/statusList/sap.card/header/data/json/listInfos/listData/payment/number", iPayList);
-				// 전표현황 Content Data Set
-				oCardModel.setProperty("/statusList/sap.card/content/data/json", statusListData);
 
-				// 전표현황 컴포넌트 새로고침
-				var oModelData = oCardModel.getProperty("/statusList");
-				if (oCard.getManifest()) {
-					oCard.refresh();
-				} else {
-					oCard.setManifest(oModelData);
-				}
+				oModel.setProperty("/sumList", iReqList);
+				oModel.setProperty("/iReqList", iReqList);
+				oModel.setProperty("/iPayList", iPayList);
+
+
+				// 전표현황 Content Data Set
+				oModel.setProperty("/paymentCard", statusListData);
+				oModel.refresh();
 
 			}).fail(function(sErrorMessage){// 호출 실패
 				alert(sErrorMessage);
@@ -546,9 +596,7 @@ sap.ui.define([
 
 			}).fail(function(sErrorMessage){// 호출 실패
 				MessageToast.show(sErrorMessage);
-			}).then(function(){
-				// 여기다가 rfc 호출후 작업코딩
-			});			
+			});		
 
 		},
 
@@ -643,11 +691,7 @@ sap.ui.define([
 					}
 	
 				}
-				
-				//oResultData.TAB1[0]..NOTE
-			}).fail(function(sErrorMessage){// 호출 실패
-				MessageToast.show(sErrorMessage);
-			}).then(function(){
+
 				//관리 부서 및 프로젝트 경비사용 추이
 				console.log(listProjData);
 				oCardModel.setProperty("/depExpTrans/sap.card/content/measures", measuresDepData);
@@ -663,10 +707,11 @@ sap.ui.define([
 				} else {
 					oCard.setManifest(oModelData);
 				}
+				
+				//oResultData.TAB1[0]..NOTE
+			}).fail(function(sErrorMessage){// 호출 실패
+				MessageToast.show(sErrorMessage);
 			});
-
-
-			
 
 		},
 
@@ -735,9 +780,8 @@ sap.ui.define([
 			oCard.refresh(); 
 			}).fail(function(sErrorMessage){  // 호출 실패
 			alert(sErrorMessage);
-			}).then(function(){  // 여기다가 rfc 호출후 작업코딩
-			
 			});
+
 		},
 		
 		/**********************************************************************************
@@ -812,9 +856,8 @@ sap.ui.define([
 			oCard.refresh(); 
 			}).fail(function(sErrorMessage){  // 호출 실패
 			alert(sErrorMessage);
-			}).then(function(){  // 여기다가 rfc 호출후 작업코딩
-			
 			});
+
 		},
 
 		/**********************************************************************************
@@ -871,8 +914,6 @@ sap.ui.define([
 			oCard.refresh(); 
 			}).fail(function(sErrorMessage){  // 호출 실패
 			alert(sErrorMessage);
-			}).then(function(){  // 여기다가 rfc 호출후 작업코딩
-			
 			});
 		},
 
@@ -930,9 +971,8 @@ sap.ui.define([
 			oCard.refresh(); 
 			}).fail(function(sErrorMessage){  // 호출 실패
 			alert(sErrorMessage);
-			}).then(function(){  // 여기다가 rfc 호출후 작업코딩
-			
 			});
+
 		},
 
 		/**********************************************************************************
@@ -958,9 +998,8 @@ sap.ui.define([
 			oCard.refresh(); 
 			}).fail(function(sErrorMessage){  // 호출 실패
 			alert(sErrorMessage);
-			}).then(function(){  // 여기다가 rfc 호출후 작업코딩
-			
 			});
+
 		},
 
 		/**********************************************************************************
@@ -986,9 +1025,8 @@ sap.ui.define([
 			oCard.refresh(); 
 			}).fail(function(sErrorMessage){  // 호출 실패
 			alert(sErrorMessage);
-			}).then(function(){  // 여기다가 rfc 호출후 작업코딩
-			
 			});
+
 		},
 
 		/**********************************************************************************
@@ -1053,6 +1091,65 @@ sap.ui.define([
 			oRouter.navTo("PaymentRt", {
 				Pcode : "Z00"
 			});
+		},
+
+		/**********************************************************************************
+		 * 함수 내용 : 전표현황 카트 콤보박스 이벤트
+		 * 작성자 : 김성진
+		 **********************************************************************************/
+		onPaymentSelect : function(){
+			var oCardModel = this.getView().getModel("cardManifests");
+			this.callDataStatusList(oCardModel);
+		},
+
+		onPaymentListSelection : function(event){
+			var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+			var sPath = event.oSource._aSelectedPaths[0]
+			var oModel = this.getView().getModel();
+			var paymentCardData = oModel.getProperty(sPath+"/name");
+			MessageToast.show(sPath);
+
+			switch (paymentCardData) {
+				case "부서 예산 증액 요청":
+					oRouter.navTo("DepBudget_YS", {
+						status : "Z00"
+					});
+					break;
+
+				case "부서 예산 증액 요청 완료":
+					oRouter.navTo("DepBudget_YS", {
+						status : "Z00"
+					});
+					break;
+
+				case "부서 예산 증액 요청 반려":
+					oRouter.navTo("DepBudget_YS", {
+						status : "Z00"
+					});
+					break;
+
+				case "프로젝트 예산 증액 요청":
+					oRouter.navTo("ProjBudget_YS", {
+						status : "Z00"
+					});
+					break;
+
+				case "프로젝트 예산 증액 요청 완료":
+					oRouter.navTo("ProjBudget_YS", {
+						status : "Z00"
+					});
+					break;
+
+				case "프로젝트 예산 증액 요청 반려":
+					oRouter.navTo("ProjBudget_YS", {
+						status : "Z00"
+					});
+					break;
+				default:
+					break;
+			}
+
+
 		}
 
   });

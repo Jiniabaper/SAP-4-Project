@@ -174,14 +174,14 @@ sap.ui.define([
                oModel.setProperty("/depComboData", oResultData.T_TAB3);
 
                oModel.setProperty("/reportTableData", oResultData.T_TAB1);
-            }).fail(function(sErrorMessage){// 호출 실패
-               alert(sErrorMessage);
-            }).then(function(){
+
                //총 지금금액 구하기 함수콜
                that.chartDataSetting(oModel.getProperty("/reportTableData"));
                that.lineChartDataSetting(oModel.getProperty("/reportTableData"));
                that.PaymentSum();
                oModel.refresh();
+            }).fail(function(sErrorMessage){// 호출 실패
+               alert(sErrorMessage);
             });
       },
 
