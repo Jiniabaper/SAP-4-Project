@@ -11,6 +11,7 @@ sap.ui.define([
 		 * 함수 내용 : 초기 작업 처리
 		 * 작성자 : 김성진
 		 **********************************************************************************/
+		//test 
 		onInit : function(){
 
 			this.getView().setModel(new JSONModel({
@@ -39,7 +40,7 @@ sap.ui.define([
 
 			this._oRouter = sap.ui.core.UIComponent.getRouterFor(this);
 			this._oRouter.attachRouteMatched(this.onAfterRendering, this);
-
+//test
 			// this.getView().addEventDelegate({
 			// 	onAfterRendering: this.onAfterRendering,
 			//   }, this);
