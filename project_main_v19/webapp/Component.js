@@ -80,7 +80,7 @@ sap.ui.define([
 		 * 함수 내용 : cookiy set function
 		 * 작성자 : 김성진
 		 ********************************************************************/
-		//test
+		//test22
 		setCookiy : function(cname, cvalue, exdays){
 			var oDate = new Date();
 			oDate.setTime(oDate.getTime() + (exdays*24*60*60*1000));
