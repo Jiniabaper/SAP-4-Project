@@ -31,7 +31,7 @@ sap.ui.define([
 
 			this._oRouter = sap.ui.core.UIComponent.getRouterFor(this);
 			this._oRouter.attachRouteMatched(this.onAfterRendering, this);
-
+//test
 			// this.getView().addEventDelegate({
 			// 	onAfterRendering: this.onAfterRendering,
 			//   }, this);
