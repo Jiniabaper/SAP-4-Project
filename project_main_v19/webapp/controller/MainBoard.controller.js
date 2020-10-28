@@ -11,7 +11,7 @@ sap.ui.define([
 		 * 함수 내용 : 초기 작업 처리
 		 * 작성자 : 김성진
 		 **********************************************************************************/
-		//test
+		//test 
 		onInit : function(){
 
 			this.getView().setModel(new JSONModel({
